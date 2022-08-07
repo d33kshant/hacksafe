@@ -2,7 +2,8 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "@/controllers/*": ["controllers/*"]
+            "@/controllers/*": ["controllers/*"],
+            "@/lib/*": ["lib/*"]
         },
         "target": "es5",
         "lib": ["dom", "dom.iterable", "esnext"],
