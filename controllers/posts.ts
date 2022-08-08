@@ -1,7 +1,6 @@
-import prisma from "@/lib/prisma"
+import { getUserFromSession } from "@/lib/auth"
 import { NextApiRequest, NextApiResponse } from "next"
-import { unstable_getServerSession } from "next-auth"
-import { config } from "../pages/api/auth/[...nextauth]"
+import prisma from "@/lib/prisma"
 
 const ITEMS_PER_PAGE = 10
 
@@ -18,26 +17,13 @@ export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 			},
 			skip: offset,
 			take: ITEMS_PER_PAGE,
-			include: {
-				_count: {
-					select: {
-						likes: true,
-					},
-				},
-			},
 		})
 
 		if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
 			res.setHeader("Content-range", `${offset}-${offset + posts.length}/${total}`)
 		}
 
-		res.json(
-			posts.map((post) => {
-				const likes = post._count.likes
-				delete post._count
-				return { ...post, likes }
-			})
-		)
+		res.json(posts.map((post) => ({ ...post, likes: post.likes.length })))
 	} catch (error) {
 		res.status(500).json({
 			error: "Something went wrong.",
@@ -47,15 +33,14 @@ export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export async function createPost(req: NextApiRequest, res: NextApiResponse) {
-	const session = await unstable_getServerSession(req, res, config)
-	const _user = session?.user
-	if (!_user?.email) return res.status(400).json({ error: "Authentication required" })
+	const user = await getUserFromSession(req, res)
+	if (!user) return res.status(400).json({ error: "Authentication required" })
 
-	const user = await prisma.user.findUnique({ where: { email: _user.email } })
-	console.log(user)
-	const title = req.body.title
-	const body = req.body.body
-	const ref = req.body.ref
+	const title: string = req.body.title
+	const body: string = req.body.body
+	const ref: string = req.body.ref
+
+	if (!title || !body) return res.json({ error: "" })
 
 	const _tags: string = req.body.tags || ""
 	const tags = _tags
@@ -69,9 +54,9 @@ export async function createPost(req: NextApiRequest, res: NextApiResponse) {
 			data: {
 				title,
 				body,
-				refId: ref,
+				ref,
 				tags,
-				authorId: user.id,
+				author: user.id,
 			},
 		})
 		res.json(post)
@@ -138,5 +123,39 @@ export async function deletePost(req: NextApiRequest, res: NextApiResponse) {
 
 export async function likePost(req: NextApiRequest, res: NextApiResponse) {
 	const id: string = Array.isArray(req.query.post) ? req.query.post[0] : req.query.post
-	const user = req["user"]
+	const user = await getUserFromSession(req, res)
+	if (!user) return res.status(400).json({ error: "Authentication required" })
+
+	try {
+		const { likes } = await prisma.post.findUnique({
+			where: { id },
+			select: { likes: true },
+		})
+		if (likes.indexOf(user.id) !== -1) {
+			await prisma.post.update({
+				where: { id },
+				data: {
+					likes: {
+						set: likes.filter((value) => value !== user.id),
+					},
+				},
+			})
+			res.json({ liked: false })
+		} else {
+			await prisma.post.update({
+				where: { id },
+				data: {
+					likes: {
+						push: user.id,
+					},
+				},
+			})
+			res.json({ liked: true })
+		}
+	} catch (error) {
+		res.status(500).json({
+			error: "Something went wrong.",
+			payload: error,
+		})
+	}
 }
