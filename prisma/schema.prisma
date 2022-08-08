@@ -24,8 +24,9 @@ model User {
     accounts Account[]
     sessions Session[]
 
-    posts      Post[] @relation("post_author")
-    likedPosts Post[]
+    posts       Post[]  @relation("post_author")
+    likedPosts  Post[]
+    likedVideos Video[]
 
     @@map(name: "users")
 }
@@ -43,24 +44,26 @@ model Video {
     createdAt DateTime @default(now()) @map(name: "created_at")
     updatedAt DateTime @updatedAt @map(name: "updated_at")
 
+    likes User[]
+
     @@map(name: "videos")
 }
 
 model Post {
-    id    String  @id @default(cuid())
-    body  String
-    title String
-    ref   String?
-
-    tags String[]
-
+    id        String   @id @default(cuid())
+    body      String
+    title     String
+    tags      String[]
     createdAt DateTime @default(now()) @map(name: "created_at")
     updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-    author   User?  @relation(name: "post_author", fields: [authorId], references: [id])
+    author   User   @relation(name: "post_author", fields: [authorId], references: [id])
     authorId String
+    likes    User[]
 
-    likes User[]
+    ref      Post?   @relation(name: "comment", fields: [refId], references: [id])
+    refId    String?
+    comments Post[]  @relation(name: "comment")
 
     @@map(name: "posts")
 }
