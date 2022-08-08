@@ -1,3 +1,4 @@
+import { getUserFromSession } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { NextApiRequest, NextApiResponse } from "next"
 
@@ -106,6 +107,45 @@ export async function deleteVideo(req: NextApiRequest, res: NextApiResponse) {
 			where: { id },
 		})
 		res.json(video)
+	} catch (error) {
+		res.status(500).json({
+			error: "Something went wrong.",
+			payload: error,
+		})
+	}
+}
+
+export async function likeVideo(req: NextApiRequest, res: NextApiResponse) {
+	const id: string = Array.isArray(req.query.video) ? req.query.post[0] : req.query.video
+	const user = await getUserFromSession(req, res)
+	if (!user) return res.status(400).json({ error: "Authentication required" })
+
+	try {
+		const { likes } = await prisma.video.findUnique({
+			where: { id },
+			select: { likes: true },
+		})
+		if (likes.indexOf(user.id) !== -1) {
+			await prisma.video.update({
+				where: { id },
+				data: {
+					likes: {
+						set: likes.filter((value) => value !== user.id),
+					},
+				},
+			})
+			res.json({ liked: false })
+		} else {
+			await prisma.video.update({
+				where: { id },
+				data: {
+					likes: {
+						push: user.id,
+					},
+				},
+			})
+			res.json({ liked: true })
+		}
 	} catch (error) {
 		res.status(500).json({
 			error: "Something went wrong.",
