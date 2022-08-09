@@ -2,11 +2,11 @@ import { ForumRounded, Help, LibraryBooks, Quiz, VideoLibrary } from "@mui/icons
 import { Box, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Typography } from "@mui/material"
 import { useRouter } from "next/router"
 
-export default function ({ open, onClose }) {
+export default function ({ variant, open, onClose }) {
 	return (
-		<Drawer variant="permanent">
+		<Drawer sx={{ width: 240 }} onClose={onClose} open={open} anchor="left" variant={variant}>
 			<Box sx={{ height: "48px" }}></Box>
-			<Box sx={{ width: 250 }} role="presentation">
+			<Box sx={{ width: 240 }} role="presentation">
 				<List>
 					<ListSubheader>
 						<Typography color="darkgrey" textTransform="uppercase" my={1} fontWeight="500">
