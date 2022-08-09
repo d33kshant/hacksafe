@@ -16,11 +16,9 @@ export default function ({ onMenuClick }) {
 			<Stack direction="row" justifyContent="space-between">
 				<Toolbar variant="dense">
 					<Stack direction="row" alignItems="center" sx={{ sm: { px: 1 } }}>
-						{onMenuClick && (
-							<IconButton onClick={() => onMenuClick()} edge="start" color="inherit" aria-label="menu" sx={{ mr: 1 }}>
-								<MenuIcon />
-							</IconButton>
-						)}
+						<IconButton onClick={onMenuClick} edge="start" color="inherit" aria-label="menu" sx={{ mr: 1 }}>
+							<MenuIcon />
+						</IconButton>
 						<Typography variant="h6">HackSafe</Typography>
 					</Stack>
 				</Toolbar>
@@ -56,7 +54,7 @@ export default function ({ onMenuClick }) {
 								</Menu>
 							</IconButton>
 						) : (
-							<Button onClick={() => signIn()} color="inherit">
+							<Button sx={{ mx: 1 }} variant="contained" onClick={() => signIn()}>
 								Sign In
 							</Button>
 						)}
