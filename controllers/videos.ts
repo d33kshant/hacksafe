@@ -14,6 +14,13 @@ export async function getVideos(req: NextApiRequest, res: NextApiResponse) {
 		const videos = await prisma.video.findMany({
 			skip: offset,
 			take: ITEMS_PER_PAGE,
+			select: {
+				id: true,
+				title: true,
+				updatedAt: true,
+				thumbnail: true,
+				views: true,
+			}
 		})
 
 		if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
@@ -32,9 +39,10 @@ export async function getVideos(req: NextApiRequest, res: NextApiResponse) {
 export async function postVideo(req: NextApiRequest, res: NextApiResponse) {
 	const title: string = req.body.title
 	const description: string = req.body.description
+	const thumbnail: string = req.body.thumbnail
 	const url: string = req.body.url
 
-	if (!title || !description || !url) {
+	if (!title || !description || !url || !thumbnail) {
 		return res.status(400).json({ error: "Missing required field in request body." })
 	}
 
@@ -52,6 +60,7 @@ export async function postVideo(req: NextApiRequest, res: NextApiResponse) {
 				tags,
 				title,
 				description,
+				thumbnail,
 			},
 		})
 		res.json(video)
