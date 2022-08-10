@@ -6,24 +6,64 @@ const ITEMS_PER_PAGE = 10
 
 export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 	const _page = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page
+	const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id
+	const user = await getUserFromSession(req, res)
 	const page = parseInt(_page) || 1
 	const offset = (page - 1) * ITEMS_PER_PAGE
 
 	try {
-		const total = await prisma.post.count()
-		const posts = await prisma.post.findMany({
-			where: {
-				ref: null,
-			},
-			skip: offset,
-			take: ITEMS_PER_PAGE,
-		})
-
-		if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
-			res.setHeader("Content-range", `${offset}-${offset + posts.length}/${total}`)
+		if (id) {
+			const post = await prisma.post.findUnique({
+				where: { id }
+			})
+			if (post) {
+				const author = await prisma.user.findUnique({
+					where: {
+						id: post.author
+					}
+				})
+				const answers = await prisma.post.findMany({
+					where: {
+						ref: post.id
+					},
+					select: { id: true }
+				})
+				return res.json({
+					...post,
+					author: {
+						id: author.id,
+						name: author.name,
+						image: author.image
+					},
+					answers: answers.map(ans => ans.id),
+					likes: post.likes.length,
+					liked: post.likes.indexOf(user?.id) !== -1
+				})
+			}
+			else return res.status(404).json({
+				error: "Post not found"
+			})
 		}
+		else {
+			const total = await prisma.post.count()
+			const posts = await prisma.post.findMany({
+				where: {
+					ref: null,
+				},
+				skip: offset,
+				take: ITEMS_PER_PAGE,
+			})
 
-		res.json(posts.map((post) => ({ ...post, likes: post.likes.length })))
+			if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
+				res.setHeader("Content-range", `${offset}-${offset + posts.length}/${total}`)
+			}
+			const answers = []
+			for (const post of posts) {
+				const ans = await prisma.post.findMany({ where: { ref: post.id } })
+				answers.push(ans.length)
+			}
+			res.json(posts.map((post, index) => ({ ...post, likes: post.likes.length, answers: answers[index] })))
+		}
 	} catch (error) {
 		res.status(500).json({
 			error: "Something went wrong.",
@@ -80,10 +120,10 @@ export async function updatePost(req: NextApiRequest, res: NextApiResponse) {
 		const _tags: string = req.body.tags
 		const tags = _tags
 			? _tags
-					.trim()
-					.split(",")
-					.filter((tag) => tag !== "")
-					.map((tag) => tag.trim().toLowerCase().replace(" ", "-"))
+				.trim()
+				.split(",")
+				.filter((tag) => tag !== "")
+				.map((tag) => tag.trim().toLowerCase().replace(" ", "-"))
 			: _post.tags
 
 		const post = await prisma.post.update({
