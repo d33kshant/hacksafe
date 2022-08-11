@@ -2,11 +2,13 @@ import ForumPostCard from "@/components/ForumPostCard"
 import NewPostDialog from "@/components/NewPostDialog"
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import { Button, Chip, Paper, Stack, Typography } from "@mui/material"
+import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
 export default function ForumPage() {
 	const [posts, setPosts] = useState([])
 	const [postDialogOpen, setPostDialogOpen] = useState(false)
+	const router = useRouter()
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -18,9 +20,19 @@ export default function ForumPage() {
 		fetchPosts()
 	}, [])
 
-	const createNewPost = (post) => {
-		console.log(post)
+	const createNewPost = async (post) => {
+		const response = await fetch("/api/posts", {
+			method: "POST",
+			headers: {
+				Accepts: "appication/json",
+				"Content-type": "application/json",
+			},
+			body: JSON.stringify(post),
+		})
+		const data = await response.json()
+		if (data.error) return alert(data.error)
 		setPostDialogOpen(false)
+		router.push("/forum/" + data.id)
 	}
 
 	return (
