@@ -12,7 +12,7 @@ export default function ({ onMenuClick }) {
 	}
 
 	return (
-		<AppBarMUI position="sticky" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+		<AppBarMUI elevation={1} position="sticky" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
 			<Stack direction="row" justifyContent="space-between">
 				<Toolbar variant="dense">
 					<Stack direction="row" alignItems="center" sx={{ sm: { px: 1 } }}>
@@ -54,7 +54,7 @@ export default function ({ onMenuClick }) {
 								</Menu>
 							</IconButton>
 						) : (
-							<Button sx={{ mx: 1 }} variant="contained" onClick={() => signIn()}>
+							<Button color="inherit" sx={{ mx: 1, py: 0.5 }} variant="text" onClick={() => signIn()}>
 								Sign In
 							</Button>
 						)}
