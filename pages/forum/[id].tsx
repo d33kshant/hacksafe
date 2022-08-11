@@ -5,13 +5,29 @@ import { Avatar, Button, Divider, IconButton, Paper, Stack, Typography } from "@
 import moment from "moment"
 import Head from "next/head"
 import { useRouter } from "next/router"
+import { useState } from "react"
 import useSWR from "swr"
+
+const likePost = async (id) => {
+	const response = await fetch("/api/like?post=" + id, {
+		method: "POST",
+		headers: {
+			Accepts: "application/json",
+		},
+	})
+	const data = await response.json()
+	return data
+}
 
 export default function ForumQuestionPage() {
 	const router = useRouter()
 	const { id } = router.query
 
 	const { data, error } = useSWR("/api/posts?id=" + id, fetcher)
+
+	const onLike = async () => {
+		const result = await likePost(id)
+	}
 
 	return (
 		<>
@@ -22,6 +38,14 @@ export default function ForumQuestionPage() {
 				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
 					{data && (
 						<>
+							<Stack pt={2} pb={1} px={2} direction="row" gap={1} alignItems="center" mb={1}>
+								<Avatar sx={{ width: 24, height: 24 }} alt={data.author.name} src={data.author.image} />
+								<Typography>{data.author.name}</Typography>
+								<Typography ml="auto" color="gray" fontSize={14}>
+									{moment(data.createdAt).fromNow()}
+								</Typography>
+							</Stack>
+							<Divider />
 							<Stack p={2} gap={1}>
 								<Typography fontWeight={500} variant="h5">
 									{data.title}
@@ -30,16 +54,14 @@ export default function ForumQuestionPage() {
 							</Stack>
 							<Divider />
 							<Stack direction="row" gap={1} alignItems="center" p={1} pr={2}>
-								<IconButton color={data.liked ? "primary" : "default"}>{data.liked ? <ThumbUpAlt /> : <ThumbUpOffAlt />}</IconButton> {data.likes} Likes
+								<IconButton onClick={onLike} color={data.liked ? "primary" : "default"}>
+									{data.liked ? <ThumbUpAlt /> : <ThumbUpOffAlt />}
+								</IconButton>{" "}
+								{data.likes} Likes
 								<IconButton>
 									<Replay />
 								</IconButton>{" "}
 								{data.answers.length} Replies
-								<Avatar sx={{ width: 24, height: 24, ml: "auto" }} alt={data.author.name} src={data.author.image} />
-								<Typography>{data.author.name}</Typography> •
-								<Typography color="gray" fontSize={14}>
-									{moment(data.createdAt).fromNow()}
-								</Typography>
 							</Stack>
 						</>
 					)}
@@ -55,7 +77,7 @@ export default function ForumQuestionPage() {
 	)
 }
 
-function SinglePost({ data }) {
+function SinglePost({ data, onLike }) {
 	return (
 		<>
 			<Stack pt={2} pb={1} px={2} direction="row" gap={1} alignItems="center" mb={1}>
@@ -72,7 +94,10 @@ function SinglePost({ data }) {
 			</Stack>
 			<Divider />
 			<Stack direction="row" gap={1} alignItems="center" p={1}>
-				<IconButton color={data.liked ? "primary" : "default"}>{data.liked ? <ThumbUpAlt /> : <ThumbUpOffAlt />}</IconButton> {data.likes} Likes
+				<IconButton onClick={onLike} color={data.liked ? "primary" : "default"}>
+					{data.liked ? <ThumbUpAlt /> : <ThumbUpOffAlt />}
+				</IconButton>{" "}
+				{data.likes} Likes
 				<IconButton>
 					<Replay />
 				</IconButton>{" "}
@@ -84,9 +109,15 @@ function SinglePost({ data }) {
 
 function PostAnswer({ id, indent }) {
 	const { data } = useSWR("/api/posts?id=" + id, fetcher)
+	const [liked, setLiked] = useState(false)
+
+	const onLike = async () => {
+		const result = await likePost(id)
+	}
+
 	return (
 		<>
-			<Paper sx={{ width: indent ? "95%" : "100%", maxWidth: "1000px", ml: "auto" }}>{data && <SinglePost data={data} />}</Paper>
+			<Paper sx={{ width: indent ? "95%" : "100%", maxWidth: "1000px", ml: "auto" }}>{data && <SinglePost onLike={onLike} data={data} />}</Paper>
 			{data?.answers && data.answers.map((ans, index) => <PostAnswer indent={true} key={index} id={ans} />)}
 		</>
 	)
