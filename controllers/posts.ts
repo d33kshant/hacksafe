@@ -80,7 +80,7 @@ export async function createPost(req: NextApiRequest, res: NextApiResponse) {
 	const body: string = req.body.body
 	const ref: string = req.body.ref
 
-	if (!title || !body) return res.json({ error: "" })
+	if (!title || !body) return res.json({ error: "Missing `title` and `body` field in request body." })
 
 	const _tags: string = req.body.tags || ""
 	const tags = _tags
