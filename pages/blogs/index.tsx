@@ -10,7 +10,7 @@ export default function BlogsPage() {
 	return (
 		<>
 			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1000px", p: 1 }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px", p: 1 }}>
 					<Stack direction="row" alignItems="center" justifyContent="space-between">
 						<Stack direction="row" gap={1}>
 							{["Most Recent", "Most Liked"].map((cat, index) => (
@@ -22,7 +22,7 @@ export default function BlogsPage() {
 						</Button>
 					</Stack>
 				</Paper>
-				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
 					<Stack alignItems="center">{getContent(error, data)}</Stack>
 				</Paper>
 			</Stack>

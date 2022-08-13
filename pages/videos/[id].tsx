@@ -30,7 +30,7 @@ export default function VideoPage() {
 
 	return (
 		<Stack p={{ sm: 1, md: 2 }} sx={{ gap: 2 }} width="100%" direction="column" alignItems="center">
-			<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+			<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
 				{loading && (
 					<Stack alignItems="center" pt={2}>
 						<CircularProgress size={36} />

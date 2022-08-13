@@ -28,7 +28,7 @@ export default function BlogPage() {
 	return (
 		<>
 			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
 					{loading && (
 						<Stack alignItems="center" pt={2}>
 							<CircularProgress size={36} />

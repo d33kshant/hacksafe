@@ -1,7 +1,7 @@
 import VideoCard from "@/components/VideoCard"
 import VideoSkeleton from "@/components/VideoSkeleton"
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
-import { Grid } from "@mui/material"
+import { Grid, Stack } from "@mui/material"
 import { useEffect, useState } from "react"
 
 export default function VideosPage() {
@@ -22,10 +22,15 @@ export default function VideosPage() {
 	}, [])
 
 	return (
-		<Grid flex={1} container p={2} spacing={{ xs: 1, sm: 2 }}>
-			{loading && <VideoSkeleton />}
-			{videos.length > 0 && videos.map((video) => <VideoCard key={video.id} data={video} />)}
-		</Grid>
+		<Stack width="100%" alignItems="center" p={2}>
+			<Grid sx={{ width: "100%", maxWidth: "1400px" }} flex={1} container spacing={{ xs: 1, sm: 2 }}>
+				{loading &&
+					Array(4)
+						.fill(0)
+						.map((_, i) => <VideoSkeleton key={i} />)}
+				{videos.length > 0 && videos.map((video) => <VideoCard key={video.id} data={video} />)}
+			</Grid>
+		</Stack>
 	)
 }
 

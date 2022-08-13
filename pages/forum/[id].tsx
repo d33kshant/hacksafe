@@ -35,7 +35,7 @@ export default function ForumQuestionPage() {
 				<title>{data ? data.title + "• HackSafe" : "Forum • HackSafe"}</title>
 			</Head>
 			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
 					{data && (
 						<>
 							<Stack pt={2} pb={1} px={2} direction="row" gap={1} alignItems="center" mb={1}>
@@ -66,7 +66,7 @@ export default function ForumQuestionPage() {
 						</>
 					)}
 				</Paper>
-				<Typography variant="h5" sx={{ width: "100%", maxWidth: "1000px", py: 1 }}>
+				<Typography variant="h5" sx={{ width: "100%", maxWidth: "1200px", py: 1 }}>
 					Answers
 				</Typography>
 				<Stack gap={2} sx={{ width: "100%", maxWidth: "1000px" }}>

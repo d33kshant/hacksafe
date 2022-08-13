@@ -39,7 +39,7 @@ export default function BlogEditor() {
 	return (
 		<>
 			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
 					<Stack alignItems="ce" direction="row" py={1} px={2}>
 						<Typography flex={1} fontWeight={500}>
 							Blog's details
@@ -52,7 +52,7 @@ export default function BlogEditor() {
 						<TextField name="tags" onChange={onInputChage} fullWidth label="Tags" placeholder="Seprate tags with comma, eg: password-sefty, tutorial, tips-and-tricks etc." variant="filled" />
 					</Stack>
 				</Paper>
-				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
 					<Tabs value={currentTab} onChange={changeTab}>
 						<Tab label="Editor" />
 						<Tab label="Preview" />

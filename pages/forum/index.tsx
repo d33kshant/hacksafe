@@ -38,7 +38,7 @@ export default function ForumPage() {
 	return (
 		<>
 			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1000px", p: 1 }}>
+				<Paper sx={{ width: "100%", maxWidth: "1200px", p: 1 }}>
 					<Stack direction="row" alignItems="center" justifyContent="space-between">
 						<Stack direction="row" gap={1}>
 							{["Most Recent", "Most Liked"].map((cat, index) => (
@@ -51,7 +51,7 @@ export default function ForumPage() {
 					</Stack>
 				</Paper>
 				<Stack width="100%" direction="column" alignItems="center">
-					<Paper sx={{ width: "100%", maxWidth: "1000px" }}>{posts.length > 0 && posts.map((post) => <ForumPostCard key={post.id} data={post} />)}</Paper>
+					<Paper sx={{ width: "100%", maxWidth: "1200px" }}>{posts.length > 0 && posts.map((post) => <ForumPostCard key={post.id} data={post} />)}</Paper>
 				</Stack>
 				<NewPostDialog onSubmit={createNewPost} open={postDialogOpen} onClose={() => setPostDialogOpen(false)} />
 			</Stack>
