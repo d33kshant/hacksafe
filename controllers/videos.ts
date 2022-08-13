@@ -6,28 +6,43 @@ const ITEMS_PER_PAGE = 10
 
 export async function getVideos(req: NextApiRequest, res: NextApiResponse) {
 	const _page = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page
+	const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id
 	const page = parseInt(_page) || 1
 	const offset = (page - 1) * ITEMS_PER_PAGE
 
 	try {
-		const total = await prisma.video.count()
-		const videos = await prisma.video.findMany({
-			skip: offset,
-			take: ITEMS_PER_PAGE,
-			select: {
-				id: true,
-				title: true,
-				updatedAt: true,
-				thumbnail: true,
-				views: true,
+		if (id) {
+			const video = await prisma.video.findUnique({
+				where: { id }
+			})
+			if (video) {
+				return res.json({ ...video, likes: video.likes.length })
 			}
-		})
+			else return res.status(404).json({
+				error: "Post not found"
+			})
+		} else {
 
-		if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
-			res.setHeader("Content-range", `${offset}-${offset + videos.length}/${total}`)
+			const total = await prisma.video.count()
+			const videos = await prisma.video.findMany({
+				skip: offset,
+				take: ITEMS_PER_PAGE,
+				select: {
+					id: true,
+					title: true,
+					updatedAt: true,
+					thumbnail: true,
+					views: true,
+					likes: true
+				}
+			})
+
+			if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
+				res.setHeader("Content-range", `${offset}-${offset + videos.length}/${total}`)
+			}
+
+			res.json(videos.map(video => ({ ...video, likes: video.likes.length })))
 		}
-
-		res.json(videos)
 	} catch (error) {
 		res.status(500).json({
 			error: "Something went wrong.",
@@ -83,10 +98,10 @@ export async function updateVideo(req: NextApiRequest, res: NextApiResponse) {
 		const _tags: string = req.body.tags
 		const tags = _tags
 			? _tags
-					.trim()
-					.split(",")
-					.filter((tag) => tag !== "")
-					.map((tag) => tag.trim().toLowerCase().replace(" ", "-"))
+				.trim()
+				.split(",")
+				.filter((tag) => tag !== "")
+				.map((tag) => tag.trim().toLowerCase().replace(" ", "-"))
 			: _video.tags
 
 		const video = await prisma.video.update({
