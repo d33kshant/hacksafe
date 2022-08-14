@@ -16,8 +16,8 @@ model User {
     email         String?   @unique
     emailVerified DateTime? @map("email_verified")
     image         String?
-    points        Int       @default(0)
 
+    points    Int      @default(0)
     createdAt DateTime @default(now()) @map(name: "created_at")
     updatedAt DateTime @updatedAt @map(name: "updated_at")
 
@@ -28,11 +28,12 @@ model User {
 }
 
 model Blog {
-    id     String   @id @default(cuid())
+    id     String @id @default(cuid())
     title  String
     body   String
     author String
     banner String
+
     points Int      @default(2) @db.SmallInt
     views  Int      @default(0)
     tags   String[]
@@ -45,19 +46,48 @@ model Blog {
 }
 
 model Video {
-    id          String   @id @default(cuid())
+    id          String @id @default(cuid())
     url         String
     title       String
     description String
     thumbnail   String
-    points      Int      @default(5) @db.SmallInt
-    views       Int      @default(0)
-    tags        String[]
-    likes       String[] @default([])
-    createdAt   DateTime @default(now()) @map(name: "created_at")
-    updatedAt   DateTime @updatedAt @map(name: "updated_at")
+
+    points Int      @default(5) @db.SmallInt
+    views  Int      @default(0)
+    tags   String[]
+    likes  String[] @default([])
+
+    createdAt DateTime @default(now()) @map(name: "created_at")
+    updatedAt DateTime @updatedAt @map(name: "updated_at")
 
     @@map(name: "videos")
+}
+
+model Question {
+    id       String   @id @default(cuid())
+    question String
+    options  String[]
+    multiple Boolean?
+    answers  Int[]
+
+    quizzes Quiz[]
+}
+
+model Quiz {
+    id          String     @id @default(cuid())
+    title       String
+    description String
+    questions   Question[]
+
+    points Int      @default(5) @db.SmallInt
+    views  Int      @default(0)
+    tags   String[]
+    likes  String[] @default([])
+
+    createdAt DateTime @default(now()) @map(name: "created_at")
+    updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+    @@map(name: "quizzes")
 }
 
 model Post {
