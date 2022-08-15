@@ -1,3 +1,4 @@
+import { getUserFromSession } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { NextApiRequest, NextApiResponse } from 'next'
 
@@ -17,6 +18,7 @@ export async function getQuiz(req: NextApiRequest, res: NextApiResponse) {
 				include: {
 					questions: {
 						select: {
+							id: true,
 							multiple: true,
 							question: true,
 							options: true,
