@@ -88,7 +88,7 @@ export async function postVideo(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export async function updateVideo(req: NextApiRequest, res: NextApiResponse) {
-	const id: string = Array.isArray(req.query.post) ? req.query.post[0] : req.query.post
+	const id: string = Array.isArray(req.query.video) ? req.query.video[0] : req.query.video
 	if (!id) return res.status(400).json({ error: "Missing 'post' in query parameter." })
 
 	try {
@@ -122,7 +122,7 @@ export async function updateVideo(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export async function deleteVideo(req: NextApiRequest, res: NextApiResponse) {
-	const id: string = Array.isArray(req.query.post) ? req.query.post[0] : req.query.post
+	const id: string = Array.isArray(req.query.video) ? req.query.video[0] : req.query.video
 
 	if (!id) return res.status(400).json({ error: "Missing 'post' in query parameter." })
 
@@ -140,7 +140,7 @@ export async function deleteVideo(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export async function likeVideo(req: NextApiRequest, res: NextApiResponse) {
-	const id: string = Array.isArray(req.query.video) ? req.query.post[0] : req.query.video
+	const id: string = Array.isArray(req.query.video) ? req.query.video[0] : req.query.video
 	const user = await getUserFromSession(req, res)
 	if (!user) return res.status(400).json({ error: "Authentication required" })
 
