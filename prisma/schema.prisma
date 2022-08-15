@@ -24,6 +24,8 @@ model User {
     accounts Account[]
     sessions Session[]
 
+    quizSubmissions QuizSubmission[]
+
     @@map(name: "users")
 }
 
@@ -87,7 +89,23 @@ model Quiz {
     createdAt DateTime @default(now()) @map(name: "created_at")
     updatedAt DateTime @updatedAt @map(name: "updated_at")
 
+    submissions QuizSubmission[]
+
     @@map(name: "quizzes")
+}
+
+model QuizSubmission {
+    id String @id @default(cuid())
+
+    answers String // Stringified JSON, Mapping<QuestionId, SelectedAnswersIndex>
+
+    createdAt DateTime @default(now()) @map(name: "created_at")
+
+    quiz   Quiz   @relation(fields: [quizId], references: [id])
+    quizId String @map("quiz_id")
+
+    user   User   @relation(fields: [userId], references: [id])
+    userId String @map("user_id")
 }
 
 model Post {
