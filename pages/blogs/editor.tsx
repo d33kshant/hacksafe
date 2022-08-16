@@ -1,7 +1,8 @@
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import { Button, Divider, Paper, Stack, Tab, Tabs, TextField, Typography } from "@mui/material"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { marked } from "marked"
+import { useRouter } from "next/router"
 // import DOMPurify from "dompurify"
 
 const INITIAL_STATE = {
@@ -14,12 +15,35 @@ const INITIAL_STATE = {
 const DEFAULT_MARKDOWN = '<p align="center">Nothing to show, Try writing some stuffs.</p>'
 
 export default function BlogEditor() {
+	const router = useRouter()
+	const { id } = router.query
+
+	const [isNew, setIsNew] = useState(true)
+	const [isFetching, setIsFetching] = useState(false)
 	const [currentTab, setCurrentTab] = useState(0)
 	const [formState, setFormState] = useState(INITIAL_STATE)
 
-	const changeTab = (_, tabIndex) => setCurrentTab(tabIndex)
+	const changeTab = (_: unknown, tabIndex: number) => setCurrentTab(tabIndex)
 
-	const updateFormState = (key, value) => {
+	useEffect(() => {
+		const fetchBlog = async () => {
+			setIsFetching(true)
+			const response = await fetch("/api/blogs?id=" + id)
+			const data = await response.json()
+
+			if (data.error) return alert(data.error)
+
+			setFormState({ title: data.title, tags: data.tags.join(", "), body: data.body, banner: data.banner })
+			setIsFetching(true)
+		}
+		if (id) {
+			setIsNew(false)
+			fetchBlog()
+		}
+		return () => setFormState(INITIAL_STATE)
+	}, [id])
+
+	const updateFormState = (key: string, value: string) => {
 		const _formState = { ...formState }
 		_formState[key] = value
 		setFormState(_formState)
@@ -27,13 +51,17 @@ export default function BlogEditor() {
 
 	const onInputChage = (event) => updateFormState(event.target.name, event.target.value)
 
-	function getMarkdownText(text) {
+	function getMarkdownText(text: string) {
 		var rawMarkup = /* DOMPurify.sanitize( */ marked.parse(text || DEFAULT_MARKDOWN) /* ) */
 		return { __html: rawMarkup }
 	}
 
 	const postTheBlog = () => {
-		// TODO
+		if (isNew) {
+			// TODO: post
+		} else {
+			// TODO: put
+		}
 	}
 
 	return (
