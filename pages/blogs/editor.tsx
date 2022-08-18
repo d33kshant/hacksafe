@@ -81,14 +81,32 @@ export default function BlogEditor() {
 		return form.title && form.body
 	}
 
-	const postTheBlog = () => {
+	const postTheBlog = async () => {
 		if (!isValidForm(formState)) {
 			return alert("Blog must contain a title and some content")
 		}
 		if (isNew) {
-			// TODO: post
+			const response = await fetch('/api/blogs', {
+				method: 'POST',
+				headers: {
+					'Accepts': 'application/json',
+					'Content-type': 'application/json'
+				},
+				body: JSON.stringify(formState)
+			})
+			const data = await response.json()
+			if (data.error) return alert(data.error)
 		} else {
-			// TODO: put
+			const response = await fetch('/api/blogs', {
+				method: 'POST',
+				headers: {
+					'Accepts': 'application/json',
+					'Content-type': 'application/json'
+				},
+				body: JSON.stringify(formState)
+			})
+			const data = await response.json()
+			if (data.error) return alert(data.error)
 		}
 	}
 
