@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react"
 import { marked } from "marked"
 import { useRouter } from "next/router"
-// import DOMPurify from "dompurify"
+import DOMPurify from "isomorphic-dompurify"
 
 const INITIAL_STATE = {
 	title: "",
@@ -71,9 +71,9 @@ export default function BlogEditor() {
 		updateFormState(event.target.name, event.target.value)
 
 	function getMarkdownText(text: string) {
-		var rawMarkup = /* DOMPurify.sanitize( */ marked.parse(
-			text || DEFAULT_MARKDOWN
-		) /* ) */
+		var rawMarkup = DOMPurify.sanitize(
+			marked.parse(text || DEFAULT_MARKDOWN)
+		)
 		return { __html: rawMarkup }
 	}
 
@@ -86,24 +86,24 @@ export default function BlogEditor() {
 			return alert("Blog must contain a title and some content")
 		}
 		if (isNew) {
-			const response = await fetch('/api/blogs', {
-				method: 'POST',
+			const response = await fetch("/api/blogs", {
+				method: "POST",
 				headers: {
-					'Accepts': 'application/json',
-					'Content-type': 'application/json'
+					Accepts: "application/json",
+					"Content-type": "application/json",
 				},
-				body: JSON.stringify(formState)
+				body: JSON.stringify(formState),
 			})
 			const data = await response.json()
 			if (data.error) return alert(data.error)
 		} else {
-			const response = await fetch('/api/blogs', {
-				method: 'POST',
+			const response = await fetch("/api/blogs", {
+				method: "POST",
 				headers: {
-					'Accepts': 'application/json',
-					'Content-type': 'application/json'
+					Accepts: "application/json",
+					"Content-type": "application/json",
 				},
-				body: JSON.stringify(formState)
+				body: JSON.stringify(formState),
 			})
 			const data = await response.json()
 			if (data.error) return alert(data.error)
