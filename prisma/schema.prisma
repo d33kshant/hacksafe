@@ -26,6 +26,8 @@ model User {
 
     quizSubmissions QuizSubmission[]
 
+    rewards Reward[]
+
     @@map(name: "users")
 }
 
@@ -120,6 +122,19 @@ model Post {
     updatedAt DateTime @updatedAt @map(name: "updated_at")
 
     @@map(name: "posts")
+}
+
+model Reward {
+    hash   String @id @default(uuid())
+    item   String
+    type   String
+    points Int
+
+    issuedAt  DateTime @default(now())
+    expiresAt DateTime
+
+    User      User   @relation(fields: [recipient], references: [id])
+    recipient String
 }
 
 // Model `Account` required for next-auth
