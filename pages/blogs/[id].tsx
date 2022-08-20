@@ -15,6 +15,7 @@ export default function BlogPage() {
 	const router = useRouter()
 	const { id } = router.query
 
+	const [timeout, _setTimeout] = useState(null)
 	const [blog, setBlog] = useState(null)
 	const [loading, setLoading] = useState(true)
 
@@ -23,10 +24,32 @@ export default function BlogPage() {
 			if (id) {
 				const response = await fetch("/api/blogs?id=" + id)
 				const data = await response.json()
-				console.log(id)
+				console.log(data)
 				if (data.error) return alert(data.error)
 				setBlog(data)
 				setLoading(false)
+
+				if (!data.eraned && timeout === null) {
+					const _timeout = setTimeout(async () => {
+						const response = await fetch("/api/points/reward", {
+							method: "POST",
+							headers: {
+								Accepts: "application/json",
+								"Content-type": "application/json",
+							},
+							body: JSON.stringify({
+								id,
+								type: "blog",
+							}),
+						})
+						const json = await response.json()
+						if (json.error) return alert(json.error)
+						alert(
+							`You earned ${json.points} points, it will be added to your account shortly.`,
+						)
+					}, 1000)
+					_setTimeout(_timeout)
+				}
 			}
 		}
 		fetchBlog()
@@ -70,8 +93,8 @@ export default function BlogPage() {
 										__html: DOMPurify.sanitize(
 											marked.parse(
 												blog.body ||
-													"Failed to render this blog"
-											)
+													"Failed to render this blog",
+											),
 										),
 									}}
 								></div>
