@@ -15,6 +15,10 @@ export async function getVideos(req: NextApiRequest, res: NextApiResponse) {
 			const video = await prisma.video.findUnique({
 				where: { id }
 			})
+			await prisma.video.update({
+				where: { id },
+				data: { views: { increment: 1 } }
+			})
 			if (video) {
 				return res.json({ ...video, likes: video.likes.length })
 			}
