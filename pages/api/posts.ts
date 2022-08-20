@@ -1,7 +1,7 @@
 import { getPosts, createPost, deletePost, updatePost } from "@/controllers/posts"
 import { NextApiRequest, NextApiResponse } from "next"
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function handleRequest(req: NextApiRequest, res: NextApiResponse) {
 	switch (req.method) {
 		case "GET":
 			return getPosts(req, res)

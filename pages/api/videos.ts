@@ -1,7 +1,7 @@
 import { deleteVideo, getVideos, postVideo, updateVideo } from "@/controllers/videos"
 import { NextApiRequest, NextApiResponse } from "next"
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function handleRequest(req: NextApiRequest, res: NextApiResponse) {
 	// TODO: Auth user and attach to req
 	switch (req.method) {
 		case "GET":
