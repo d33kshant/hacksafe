@@ -72,7 +72,7 @@ export default function BlogEditor() {
 
 	function getMarkdownText(text: string) {
 		var rawMarkup = DOMPurify.sanitize(
-			marked.parse(text || DEFAULT_MARKDOWN)
+			marked.parse(text || DEFAULT_MARKDOWN),
 		)
 		return { __html: rawMarkup }
 	}
@@ -96,6 +96,7 @@ export default function BlogEditor() {
 			})
 			const data = await response.json()
 			if (data.error) return alert(data.error)
+			alert("Blog posted successfully.")
 		} else {
 			const response = await fetch("/api/blogs", {
 				method: "POST",
@@ -107,6 +108,7 @@ export default function BlogEditor() {
 			})
 			const data = await response.json()
 			if (data.error) return alert(data.error)
+			alert("Blog updated successfully.")
 		}
 	}
 
@@ -172,7 +174,7 @@ export default function BlogEditor() {
 					<TabPanel currentTab={currentTab} index={1}>
 						<div
 							dangerouslySetInnerHTML={getMarkdownText(
-								formState.body
+								formState.body,
 							)}
 						></div>
 					</TabPanel>
