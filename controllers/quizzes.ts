@@ -26,6 +26,10 @@ export async function getQuiz(req: NextApiRequest, res: NextApiResponse) {
 					}
 				}
 			})
+			await prisma.quiz.update({
+				where: { id },
+				data: { views: { increment: 1 } }
+			})
 			if (_quiz) {
 				const quiz = { ..._quiz, likes: _quiz.likes.length }
 				res.json(quiz)
