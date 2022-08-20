@@ -16,10 +16,19 @@ export async function getBlogs(req: NextApiRequest, res: NextApiResponse) {
 			const blog = await prisma.blog.findUnique({
 				where: { id }
 			})
+			await prisma.blog.update({
+				where: { id },
+				data: { views: { increment: 1 } }
+			})
 			if (blog) {
 				const author = await prisma.user.findUnique({
 					where: {
 						id: blog.author
+					},
+					include: {
+						rewards: {
+							where: { item: id }
+						}
 					}
 				})
 				return res.json({
@@ -30,7 +39,8 @@ export async function getBlogs(req: NextApiRequest, res: NextApiResponse) {
 						image: author.image
 					},
 					likes: blog.likes.length,
-					liked: blog.likes.indexOf(user?.id) !== -1
+					liked: blog.likes.indexOf(user?.id) !== -1,
+					earned: author.rewards.length > 0
 				})
 			}
 			else return res.status(404).json({
