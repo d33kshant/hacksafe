@@ -25,6 +25,17 @@ export async function rewardPoint(req: NextApiRequest, res: NextApiResponse) {
 	const type: string = req.body.type
 
 	try {
+
+		const _reward = await prisma.user.findUnique({
+			where: { id: user.id },
+			include: {
+				rewards: {
+					where: { item: id }
+				}
+			}
+		})
+		if (_reward.rewards.length > 0) return res.json({ error: "Points already claimed." })
+
 		const client: any = getClientForType(type)
 		if (client.error) return res.json({ error: client.error })
 
