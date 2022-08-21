@@ -26,7 +26,8 @@ model User {
 
     quizSubmissions QuizSubmission[]
 
-    rewards Reward[]
+    rewards        Reward[]
+    redeemedOffers Offer[]
 
     @@map(name: "users")
 }
@@ -135,6 +136,18 @@ model Reward {
 
     User      User   @relation(fields: [recipient], references: [id])
     recipient String
+}
+
+model Offer {
+    id       String @id @default(cuid())
+    code     String @default(cuid())
+    benefits String
+    points   Int
+
+    createdAt DateTime @default(now()) @map(name: "created_at")
+    updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+    redeemedBy User[]
 }
 
 // Model `Account` required for next-auth
