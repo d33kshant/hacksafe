@@ -2,7 +2,22 @@ import PointsChip from "@/components/PointsChip"
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import fetcher from "@/lib/fetcher"
 import { ThumbUpAltOutlined } from "@mui/icons-material"
-import { Checkbox, Chip, Divider, FormControl, FormControlLabel, FormGroup, IconButton, Link, Paper, Radio, RadioGroup, Stack, Typography } from "@mui/material"
+import {
+	Button,
+	Checkbox,
+	Chip,
+	Divider,
+	FormControl,
+	FormControlLabel,
+	FormGroup,
+	IconButton,
+	Link,
+	Paper,
+	Radio,
+	RadioGroup,
+	Stack,
+	Typography,
+} from "@mui/material"
 import moment from "moment"
 import { useRouter } from "next/router"
 import { useState } from "react"
@@ -21,8 +36,30 @@ export default function QuizPage() {
 		_setFormState(_formState)
 	}
 
+	const submitQuiz = async () => {
+		const _confirm = confirm("Are you sure you want to submit?")
+		if (!_confirm) return
+
+		const response = await fetch("/api/submit", {
+			method: "POST",
+			headers: {
+				Accepts: "application/json",
+				"Content-type": "application/json",
+			},
+			body: JSON.stringify(formState),
+		})
+		const data = await response.json()
+		if (data.error) return alert(data.alert)
+		alert(data.message)
+	}
+
 	return (
-		<Stack width="100%" alignItems="center" p={{ xs: 1, md: 2 }} gap={{ xs: 1, md: 2 }}>
+		<Stack
+			width="100%"
+			alignItems="center"
+			p={{ xs: 1, md: 2 }}
+			gap={{ xs: 1, md: 2 }}
+		>
 			<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
 				{!error && data && (
 					<>
@@ -46,16 +83,30 @@ export default function QuizPage() {
 									<ThumbUpAltOutlined />
 								</IconButton>
 								<Typography>
-									{data.likes} Likes • {data.views} Views • {moment(data.createdAt).fromNow()}
+									{data.likes} Likes • {data.views} Views •{" "}
+									{moment(data.createdAt).fromNow()}
 								</Typography>
 							</Stack>
 						</Stack>
 						<Divider />
 						<Stack>
 							{data.questions?.map((question) => (
-								<Question setSelection={setFormState} selections={formState[question.id] || []} key={question.id} data={question} />
+								<Question
+									setSelection={setFormState}
+									selections={formState[question.id] || []}
+									key={question.id}
+									data={question}
+								/>
 							))}
 						</Stack>
+						<Divider />
+						<Button
+							onClick={submitQuiz}
+							variant="contained"
+							color="success"
+						>
+							Submit
+						</Button>
 					</>
 				)}
 			</Paper>
@@ -63,11 +114,17 @@ export default function QuizPage() {
 	)
 }
 
-function Question({ setSelection, selections, data: { id, question, options, multiple } }) {
+function Question({
+	setSelection,
+	selections,
+	data: { id, question, options, multiple },
+}) {
 	const onOptionSelect = (index: number) => {
 		if (multiple) {
 			if (selections.indexOf(index) !== -1) {
-				const _selection = [...selections].filter((selection) => selection !== index)
+				const _selection = [...selections].filter(
+					(selection) => selection !== index,
+				)
 				_selection.sort()
 				setSelection(id, _selection)
 			} else {
@@ -91,7 +148,22 @@ function Question({ setSelection, selections, data: { id, question, options, mul
 							<>
 								<FormGroup sx={{ alignItems: "start" }}>
 									{options.map((option, index) => (
-										<FormControlLabel key={index} onChange={() => onOptionSelect(index)} control={<Checkbox checked={selections.indexOf(index) !== -1} />} label={option} />
+										<FormControlLabel
+											key={index}
+											onChange={() =>
+												onOptionSelect(index)
+											}
+											control={
+												<Checkbox
+													checked={
+														selections.indexOf(
+															index,
+														) !== -1
+													}
+												/>
+											}
+											label={option}
+										/>
 									))}
 								</FormGroup>
 							</>
@@ -99,14 +171,34 @@ function Question({ setSelection, selections, data: { id, question, options, mul
 							<>
 								<RadioGroup name={`radio-group-${id}`}>
 									{options.map((option, index) => (
-										<FormControlLabel onChange={() => onOptionSelect(index)} value={option} key={index} control={<Radio checked={selections.indexOf(index) !== -1} />} label={option} />
+										<FormControlLabel
+											onChange={() =>
+												onOptionSelect(index)
+											}
+											value={option}
+											key={index}
+											control={
+												<Radio
+													checked={
+														selections.indexOf(
+															index,
+														) !== -1
+													}
+												/>
+											}
+											label={option}
+										/>
 									))}
 								</RadioGroup>
 							</>
 						)}
 					</FormControl>
 				</Stack>
-				<Typography sx={{ cursor: "pointer" }} onClick={() => setSelection(id, [])} color="gray">
+				<Typography
+					sx={{ cursor: "pointer" }}
+					onClick={() => setSelection(id, [])}
+					color="gray"
+				>
 					Clear Selection
 				</Typography>
 			</Stack>
