@@ -1,22 +1,45 @@
 import { signIn, signOut, useSession } from "next-auth/react"
-import { IconButton, Toolbar, Typography, Stack, Avatar, Button, AppBar as AppBarMUI, MenuItem, Menu } from "@mui/material"
+import {
+	IconButton,
+	Toolbar,
+	Typography,
+	Stack,
+	Avatar,
+	Button,
+	AppBar as AppBarMUI,
+	MenuItem,
+	Menu,
+} from "@mui/material"
 import { Menu as MenuIcon } from "@mui/icons-material"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 export default function ({ onMenuClick }) {
 	const { data, status } = useSession()
-	const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
+	const [menuOpen, setMenuOpen] = useState(false)
+	const menuAnchor = useRef(null)
 
-	const handleClose = () => {
-		setMenuAnchor(null)
-	}
+	const handleClose = () => setMenuOpen(false)
 
 	return (
-		<AppBarMUI elevation={1} position="sticky" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+		<AppBarMUI
+			elevation={1}
+			position="sticky"
+			sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+		>
 			<Stack direction="row" justifyContent="space-between">
 				<Toolbar variant="dense">
-					<Stack direction="row" alignItems="center" sx={{ sm: { px: 1 } }}>
-						<IconButton onClick={onMenuClick} edge="start" color="inherit" aria-label="menu" sx={{ mr: 1 }}>
+					<Stack
+						direction="row"
+						alignItems="center"
+						sx={{ sm: { px: 1 } }}
+					>
+						<IconButton
+							onClick={onMenuClick}
+							edge="start"
+							color="inherit"
+							aria-label="menu"
+							sx={{ mr: 1 }}
+						>
 							<MenuIcon />
 						</IconButton>
 						<Typography variant="h6">HackSafe</Typography>
@@ -25,24 +48,34 @@ export default function ({ onMenuClick }) {
 				{status !== "loading" && (
 					<Stack direction="row" alignItems="center" px={1}>
 						{data?.user ? (
-							<IconButton onClick={(event) => setMenuAnchor(event.currentTarget)}>
-								<Avatar sx={{ height: "28px", width: "28px" }} alt="Profile" src={data?.user?.image} />
+							<IconButton
+								ref={menuAnchor}
+								onClick={(event) => setMenuOpen(true)}
+							>
+								<Avatar
+									sx={{ height: "28px", width: "28px" }}
+									alt="Profile"
+									src={data?.user?.image}
+								/>
 								<Menu
 									id="demo-positioned-menu"
-									anchorEl={menuAnchor}
-									open={Boolean(menuAnchor)}
-									onClose={handleClose}
+									anchorEl={menuAnchor.current}
+									open={menuOpen}
+									onClose={() => setMenuOpen(false)}
 									anchorOrigin={{
 										vertical: "top",
-										horizontal: "left",
+										horizontal: "right",
 									}}
 									transformOrigin={{
 										vertical: "top",
 										horizontal: "left",
 									}}
 								>
-									<MenuItem onClick={handleClose}>Profile</MenuItem>
-									<MenuItem onClick={handleClose}>My account</MenuItem>
+									<MenuItem onClick={handleClose}>
+										<Typography component="a" href="/me">
+											Profile
+										</Typography>
+									</MenuItem>
 									<MenuItem
 										onClick={() => {
 											signOut()
@@ -54,7 +87,12 @@ export default function ({ onMenuClick }) {
 								</Menu>
 							</IconButton>
 						) : (
-							<Button color="inherit" sx={{ mx: 1, py: 0.5 }} variant="text" onClick={() => signIn()}>
+							<Button
+								color="inherit"
+								sx={{ mx: 1, py: 0.5 }}
+								variant="text"
+								onClick={() => signIn()}
+							>
 								Sign In
 							</Button>
 						)}
