@@ -1,15 +1,20 @@
+import BlogsCardHomePage from "@/components/BlogsCardHomePage"
 import HomeNavigationCard from "@/components/HomeNavCard"
 import VideoCardHomePage from "@/components/VideoCardHomePage"
 import { LibraryBooks, Queue, Quiz, VideoLibrary } from "@mui/icons-material"
-import { Avatar, Divider, Grid, Paper, Stack, Typography } from "@mui/material"
+import { Avatar, Button, Divider, Grid, Paper, Stack, Typography } from "@mui/material"
+import { useSession } from "next-auth/react"
 
 export default function Home() {
+	
+	const { data } = useSession()
+
 	return (
-		<Stack height="100%" width="100%">
+		<Stack width="100%">
 			<Stack
 				justifyContent="center"
 				alignItems="center"
-				height="40vh"
+				height="500px"
 				width="100%"
 				p={1}
 				sx={{ background: "mediumseagreen" }}
@@ -26,9 +31,9 @@ export default function Home() {
 					An education and reward platform where you can learn
 					cyberhygiene to earn free rewards.
 				</Typography>
+				<Button onClick={()=>{}} sx={{ mt: 2 }} variant="contained" color="inherit">{data.user ? "Start Learning" : "Get Started"}</Button>
 			</Stack>
 			<Stack
-				sx={{ transform: "translateY(-64px)" }}
 				alignItems="center"
 				p={1}
 				gap={2}
@@ -78,6 +83,7 @@ export default function Home() {
 					</Grid>
 				</Paper>
 				<VideoCardHomePage />
+				<BlogsCardHomePage />
 			</Stack>
 		</Stack>
 	)
