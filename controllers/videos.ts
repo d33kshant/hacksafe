@@ -7,6 +7,7 @@ const ITEMS_PER_PAGE = 10
 export async function getVideos(req: NextApiRequest, res: NextApiResponse) {
 	const _page = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page
 	const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id
+	const author = Array.isArray(req.query.author) ? req.query.author[0] : req.query.author
 	const page = parseInt(_page) || 1
 	const offset = (page - 1) * ITEMS_PER_PAGE
 
@@ -15,26 +16,53 @@ export async function getVideos(req: NextApiRequest, res: NextApiResponse) {
 			const video = await prisma.video.findUnique({
 				where: { id }
 			})
+
+			if (video.status !== 'Published') {
+				const user = await getUserFromSession(req, res)
+				console.log(user?.name)
+				if (user?.id === video.author) {
+					return res.json({ ...video, likes: video.likes.length })
+				}
+				return res.json({ error: "The video is not available" })
+			}
+			delete video.status
 			await prisma.video.update({
 				where: { id },
 				data: { views: { increment: 1 } }
 			})
+			const user = await getUserFromSession(req, res)
 			if (video) {
-				return res.json({ ...video, likes: video.likes.length })
+				return res.json({ ...video, likes: video.likes.length, liked: video.likes.indexOf(user?.id) !== -1 })
 			}
 			else return res.status(404).json({
 				error: "Post not found"
 			})
+		} else if (author) {
+			const videos = await prisma.video.findMany({
+				where: { author }
+			})
+			const user = await getUserFromSession(req, res)
+			if (user?.id === author) {
+				res.json(videos)
+			} else {
+				for (const video of videos) {
+					delete video.status
+				}
+				res.json(videos)
+			}
 		} else {
 
 			const total = await prisma.video.count()
 			const videos = await prisma.video.findMany({
+				where: {
+					status: 'Published'
+				},
 				skip: offset,
 				take: ITEMS_PER_PAGE,
 				select: {
 					id: true,
 					title: true,
-					updatedAt: true,
+					createdAt: true,
 					thumbnail: true,
 					views: true,
 					likes: true
@@ -80,6 +108,7 @@ export async function postVideo(req: NextApiRequest, res: NextApiResponse) {
 				title,
 				description,
 				thumbnail,
+				status: 'Pending'
 			},
 		})
 		res.json(video)

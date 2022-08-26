@@ -7,6 +7,7 @@ const ITEMS_PER_PAGE = 10
 export async function getBlogs(req: NextApiRequest, res: NextApiResponse) {
 	const _page = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page
 	const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id
+	const author = Array.isArray(req.query.author) ? req.query.author[0] : req.query.author
 	const user = await getUserFromSession(req, res)
 	const page = parseInt(_page) || 1
 	const offset = (page - 1) * ITEMS_PER_PAGE
@@ -46,20 +47,43 @@ export async function getBlogs(req: NextApiRequest, res: NextApiResponse) {
 			else return res.status(404).json({
 				error: "Blog not found"
 			})
-		}
-		else {
+		} else if (author) {
+			const blogs = await prisma.blog.findMany({
+				where: { author }
+			})
+			const user = await getUserFromSession(req, res)
+			if (user?.id === author) {
+				res.json(blogs)
+			} else {
+				for (const blog of blogs) {
+					delete blog.status
+				}
+				res.json(blogs)
+			}
+		} else {
 			const total = await prisma.blog.count()
 			const blogs = await prisma.blog.findMany({
+				where: {
+					status: "Published"
+				},
 				skip: offset,
 				take: ITEMS_PER_PAGE,
+				select: {
+					id: true,
+					title: true,
+					tags: true,
+					banner: true,
+					points: true,
+					createdAt: true,
+					views: true,
+					likes: true
+				}
 			})
 
 			if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
 				res.setHeader("Content-range", `${offset}-${offset + blogs.length}/${total}`)
 			}
 			res.json(blogs.map((post) => {
-				delete post.body
-				delete post.updatedAt
 				return { ...post, likes: post.likes.length }
 			}))
 		}
@@ -96,6 +120,7 @@ export async function createBlog(req: NextApiRequest, res: NextApiResponse) {
 				banner,
 				tags,
 				author: user.id,
+				status: 'Pending'
 			}
 		})
 		res.json(post)
@@ -114,4 +139,43 @@ export async function updateBlog(req: NextApiRequest, res: NextApiResponse) {
 
 export async function deleteBlog(req: NextApiRequest, res: NextApiResponse) {
 
+}
+
+export async function likeBlog(req: NextApiRequest, res: NextApiResponse) {
+	const id: string = Array.isArray(req.query.blog) ? req.query.blog[0] : req.query.blog
+	const user = await getUserFromSession(req, res)
+	if (!user) return res.status(400).json({ error: "Authentication required" })
+
+	try {
+		const { likes } = await prisma.blog.findUnique({
+			where: { id },
+			select: { likes: true },
+		})
+		if (likes.indexOf(user.id) !== -1) {
+			await prisma.blog.update({
+				where: { id },
+				data: {
+					likes: {
+						set: likes.filter((value) => value !== user.id),
+					},
+				},
+			})
+			res.json({ liked: false })
+		} else {
+			await prisma.blog.update({
+				where: { id },
+				data: {
+					likes: {
+						push: user.id,
+					},
+				},
+			})
+			res.json({ liked: true })
+		}
+	} catch (error) {
+		res.status(500).json({
+			error: "Something went wrong.",
+			payload: error,
+		})
+	}
 }

@@ -40,7 +40,7 @@ export default function QuizPage() {
 		const _confirm = confirm("Are you sure you want to submit?")
 		if (!_confirm) return
 
-		const response = await fetch("/api/submit", {
+		const response = await fetch("/api/submit?id=" + id, {
 			method: "POST",
 			headers: {
 				Accepts: "application/json",
@@ -51,6 +51,7 @@ export default function QuizPage() {
 		const data = await response.json()
 		if (data.error) return alert(data.alert)
 		alert(data.message)
+		window.location.href = "/quizzes"
 	}
 
 	return (
@@ -68,7 +69,7 @@ export default function QuizPage() {
 								<Typography flex={1} variant="h4">
 									{data.title}
 								</Typography>
-								<PointsChip value={data.points} />
+								<PointsChip sx={{}} value={data.points} />
 							</Stack>
 							<Typography mb={1} color="gray">
 								{data.description}
@@ -83,8 +84,9 @@ export default function QuizPage() {
 									<ThumbUpAltOutlined />
 								</IconButton>
 								<Typography>
-									{data.likes} Likes • {data.views} Views •{" "}
-									{moment(data.createdAt).fromNow()}
+									{data?.likes} Likes • {data?.views} Views •{" "}
+									{moment(data.createdAt).fromNow()} •{" "}
+									{data?.submissions} Submission
 								</Typography>
 							</Stack>
 						</Stack>
@@ -104,6 +106,8 @@ export default function QuizPage() {
 							onClick={submitQuiz}
 							variant="contained"
 							color="success"
+							fullWidth
+							disabled={!Boolean(data?.submitted)}
 						>
 							Submit
 						</Button>

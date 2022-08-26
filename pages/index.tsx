@@ -1,15 +1,24 @@
 import HomeNavigationCard from "@/components/HomeNavCard"
+import HomePageBlogsCard from "@/components/HomePageBlogsCard"
 import VideoCardHomePage from "@/components/VideoCardHomePage"
 import { LibraryBooks, Queue, Quiz, VideoLibrary } from "@mui/icons-material"
-import { Avatar, Divider, Grid, Paper, Stack, Typography } from "@mui/material"
+import {
+	Avatar,
+	Button,
+	Divider,
+	Grid,
+	Paper,
+	Stack,
+	Typography,
+} from "@mui/material"
 
 export default function Home() {
 	return (
-		<Stack height="100%" width="100%">
+		<Stack width="100%">
 			<Stack
 				justifyContent="center"
 				alignItems="center"
-				height="40vh"
+				height="450px"
 				width="100%"
 				p={1}
 				sx={{ background: "mediumseagreen" }}
@@ -18,21 +27,25 @@ export default function Home() {
 					HackSafe
 				</Typography>
 				<Typography
-					mt={2}
+					my={2}
 					variant="h5"
-					maxWidth="800px"
+					maxWidth="720px"
 					textAlign="center"
 				>
 					An education and reward platform where you can learn
-					cyberhygiene to earn free rewards.
+					cyberhygiene and earn free rewards.
 				</Typography>
+				<Button
+					onClick={() => {
+						window.location.href = "/videos"
+					}}
+					variant="contained"
+					color="inherit"
+				>
+					Continue Learning
+				</Button>
 			</Stack>
-			<Stack
-				sx={{ transform: "translateY(-64px)" }}
-				alignItems="center"
-				p={1}
-				gap={2}
-			>
+			<Stack alignItems="center" p={2} gap={2}>
 				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
 					<Grid container>
 						<HomeNavigationCard
@@ -53,7 +66,7 @@ export default function Home() {
 								</Avatar>
 							}
 							href="/blogs"
-							description="Learn the best practices of cyber hygiene through video tutorial and courses and earn reward with that"
+							description="Read blogs and article about cyber hyigene or write you own blogs and earn reward with that"
 						/>
 						<HomeNavigationCard
 							title="Play Quizzes"
@@ -63,7 +76,7 @@ export default function Home() {
 								</Avatar>
 							}
 							href="/quizzes"
-							description="Learn the best practices of cyber hygiene through video tutorial and courses and earn reward with that"
+							description="Test your knowledge on cyber hygiene and earn points for correct answers."
 						/>
 						<HomeNavigationCard
 							title="Ask Questions"
@@ -73,11 +86,12 @@ export default function Home() {
 								</Avatar>
 							}
 							href="/forum"
-							description="Learn the best practices of cyber hygiene through video tutorial and courses and earn reward with that"
+							description="If you have any dought you can ask it here or you can answer other's questions"
 						/>
 					</Grid>
 				</Paper>
 				<VideoCardHomePage />
+				<HomePageBlogsCard />
 			</Stack>
 		</Stack>
 	)

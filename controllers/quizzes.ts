@@ -10,6 +10,7 @@ export async function getQuiz(req: NextApiRequest, res: NextApiResponse) {
 	const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id
 	const page = parseInt(_page) || 1
 	const offset = (page - 1) * ITEMS_PER_PAGE
+	const user = await getUserFromSession(req, res)
 
 	try {
 		if (id) {
@@ -23,16 +24,25 @@ export async function getQuiz(req: NextApiRequest, res: NextApiResponse) {
 							question: true,
 							options: true,
 						}
-					}
+					},
+					_count: true
 				}
 			})
-			await prisma.quiz.update({
-				where: { id },
-				data: { views: { increment: 1 } }
-			})
 			if (_quiz) {
-				const quiz = { ..._quiz, likes: _quiz.likes.length }
-				res.json(quiz)
+				const isSubmitted = await prisma.quizSubmission.findMany({
+					where: {
+						userId: user?.id
+					}
+				})
+				const quiz = { ..._quiz, likes: _quiz.likes.length, submissions: _quiz._count.submissions }
+				await prisma.quiz.update({
+					where: { id },
+					data: { views: { increment: 1 } }
+				})
+				res.json({
+					...quiz,
+					submitted: isSubmitted.length <= 0
+				})
 			} else {
 				res.status(404).json({ error: "Quiz not found." })
 			}
@@ -47,9 +57,10 @@ export async function getQuiz(req: NextApiRequest, res: NextApiResponse) {
 			const quizzes = _quizzes.map(quiz => {
 				const questions = quiz._count.questions
 				const likes = quiz.likes.length
+				const submissions = quiz._count.submissions
 				delete quiz.likes
 				delete quiz._count
-				return { ...quiz, likes, questions }
+				return { ...quiz, likes, questions, submissions }
 			})
 			res.json(quizzes)
 		}

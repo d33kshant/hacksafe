@@ -56,7 +56,15 @@ export async function rewardPoint(req: NextApiRequest, res: NextApiResponse) {
 				points: item.points
 			}
 		})
-		res.json({ message: `You won ${item.points} points!`, reward })
+		await prisma.user.update({
+			where: { id: user.id },
+			data: {
+				points: {
+					increment: item.points
+				}
+			}
+		})
+		res.json({ message: `You won ${item.points} points!`, reward, points: item.points })
 	} catch (error) {
 		res.status(500).json({
 			error: "Something went wrong.",
@@ -66,9 +74,32 @@ export async function rewardPoint(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export async function redeemPoints(req: NextApiRequest, res: NextApiResponse) {
+	const user = await getUserFromSession(req, res)
+	if (!user) return res.status(400).json({ error: "Authentication required" })
+	const id = Array.isArray(req.query.offer) ? req.query.offer[0] : req.query.offer
 	try {
-		// TODO: Redeem
-		res.json({ message: "TODO: Redeem feature" })
+		const offer = await prisma.offer.findUnique({ where: { id } })
+		if (!offer) return res.json({ error: "Offer not found" })
+
+		const rewards = await prisma.reward.findMany({
+			where: { recipient: user.id }
+		})
+		const points = rewards.reduce((p, c) => p + c.points, 0)
+
+		if (points < offer.points) {
+			return res.json({
+				error: `You need ${offer.points - points} more points to redeem this offer`
+			})
+		}
+		await prisma.user.update({
+			where: { id: user.id },
+			data: {
+				points: {
+					decrement: offer.points
+				}
+			}
+		})
+		res.json(offer)
 	} catch (error) {
 		res.status(500).json({
 			error: "Something went wrong.",

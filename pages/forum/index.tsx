@@ -32,28 +32,59 @@ export default function ForumPage() {
 		const data = await response.json()
 		if (data.error) return alert(data.error)
 		setPostDialogOpen(false)
-		router.push("/forum/" + data.id)
+		alert("Post created successfully")
 	}
 
 	return (
 		<>
-			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1200px", p: 1 }}>
-					<Stack direction="row" alignItems="center" justifyContent="space-between">
+			<Stack
+				sx={{ p: 2, gap: 2 }}
+				width="100%"
+				direction="column"
+				alignItems="center"
+			>
+				<Paper sx={{ width: "100%", maxWidth: "1000px", p: 1 }}>
+					<Stack
+						direction="row"
+						alignItems="center"
+						justifyContent="space-between"
+					>
 						<Stack direction="row" gap={1}>
 							{["Most Recent", "Most Liked"].map((cat, index) => (
-								<Chip key={index} color={index === 0 ? "secondary" : "default"} clickable label={cat} />
+								<Chip
+									key={index}
+									color={
+										index === 0 ? "secondary" : "default"
+									}
+									clickable
+									label={cat}
+								/>
 							))}
 						</Stack>
-						<Button onClick={() => setPostDialogOpen(true)} variant="contained" color="success" sx={{ boxShadow: 0 }}>
+						<Button
+							onClick={() => setPostDialogOpen(true)}
+							variant="contained"
+							color="success"
+							sx={{ boxShadow: 0 }}
+						>
 							Ask a qestion
 						</Button>
 					</Stack>
 				</Paper>
 				<Stack width="100%" direction="column" alignItems="center">
-					<Paper sx={{ width: "100%", maxWidth: "1200px" }}>{posts.length > 0 && posts.map((post) => <ForumPostCard key={post.id} data={post} />)}</Paper>
+					<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
+						{posts.length > 0 &&
+							posts.map((post) => (
+								<ForumPostCard key={post.id} data={post} />
+							))}
+					</Paper>
 				</Stack>
-				<NewPostDialog onSubmit={createNewPost} open={postDialogOpen} onClose={() => setPostDialogOpen(false)} />
+				<NewPostDialog
+					reference={null}
+					onSubmit={createNewPost}
+					open={postDialogOpen}
+					onClose={() => setPostDialogOpen(false)}
+				/>
 			</Stack>
 		</>
 	)

@@ -1,7 +1,7 @@
 import OfferCard from "@/components/OfferCard"
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import fetcher from "@/lib/fetcher"
-import { CircularProgress, Paper, Stack, Typography } from "@mui/material"
+import { CircularProgress, Grid, Paper, Stack, Typography } from "@mui/material"
 import useSWR from "swr"
 
 export default function OffersPage() {
@@ -25,12 +25,14 @@ export default function OffersPage() {
 	}
 
 	return (
-		<Stack>
-			<Paper>
-				{data.map((offer) => (
-					<OfferCard key={offer.id} data={offer} />
-				))}
-			</Paper>
+		<Stack width="100%" alignItems="center">
+			<Stack sx={{ width: "100%", maxWidth: "1200px", p: 2 }}>
+				<Grid spacing={2} container>
+					{data.map((offer) => (
+						<OfferCard key={offer.id} data={offer} />
+					))}
+				</Grid>
+			</Stack>
 		</Stack>
 	)
 }

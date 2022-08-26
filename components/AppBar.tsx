@@ -42,7 +42,9 @@ export default function ({ onMenuClick }) {
 						>
 							<MenuIcon />
 						</IconButton>
-						<Typography variant="h6">HackSafe</Typography>
+						<Typography component="a" href="/" variant="h6">
+							HackSafe
+						</Typography>
 					</Stack>
 				</Toolbar>
 				{status !== "loading" && (

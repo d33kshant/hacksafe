@@ -10,6 +10,12 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum Status {
+    Published
+    Pending
+    Rejected
+}
+
 model User {
     id            String    @id @default(cuid())
     name          String?
@@ -29,6 +35,10 @@ model User {
     rewards        Reward[]
     redeemedOffers Offer[]
 
+    videos Video[] @relation(name: "video_author")
+    blogs  Blog[]  @relation(name: "blog_author")
+    post   Post[]  @relation(name: "post_author")
+
     @@map(name: "users")
 }
 
@@ -36,7 +46,6 @@ model Blog {
     id     String @id @default(cuid())
     title  String
     body   String
-    author String
     banner String
 
     points Int      @default(2) @db.SmallInt
@@ -46,6 +55,11 @@ model Blog {
 
     createdAt DateTime @default(now()) @map(name: "created_at")
     updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+    status Status @default(Pending)
+
+    User   User   @relation(fields: [author], references: [id], name: "blog_author")
+    author String
 
     @@map(name: "blogs")
 }
@@ -57,6 +71,8 @@ model Video {
     description String
     thumbnail   String
 
+    status Status @default(Pending)
+
     points Int      @default(5) @db.SmallInt
     views  Int      @default(0)
     tags   String[]
@@ -64,6 +80,9 @@ model Video {
 
     createdAt DateTime @default(now()) @map(name: "created_at")
     updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+    User   User?   @relation(fields: [author], references: [id], name: "video_author")
+    author String?
 
     @@map(name: "videos")
 }
@@ -112,10 +131,13 @@ model QuizSubmission {
 }
 
 model Post {
-    id        String   @id @default(cuid())
-    body      String
-    title     String
-    author    String
+    id    String @id @default(cuid())
+    body  String
+    title String
+
+    User   User   @relation(fields: [author], references: [id], name: "post_author")
+    author String
+
     ref       String?
     tags      String[]
     likes     String[] @default([])
@@ -148,6 +170,17 @@ model Offer {
     updatedAt DateTime @updatedAt @map(name: "updated_at")
 
     redeemedBy User[]
+}
+
+model Report {
+    id          String  @id @default(cuid())
+    contentId   String
+    contentType String
+    reason      String
+    email       String
+    originalUrl String?
+
+    createdAt DateTime @default(now()) @map(name: "created_at")
 }
 
 // Model `Account` required for next-auth

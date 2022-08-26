@@ -1,7 +1,16 @@
+import NewPostDialog from "@/components/NewPostDialog"
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import fetcher from "@/lib/fetcher"
 import { Replay, Reply, ThumbUpAlt, ThumbUpOffAlt } from "@mui/icons-material"
-import { Avatar, Button, Divider, IconButton, Paper, Stack, Typography } from "@mui/material"
+import {
+	Avatar,
+	Button,
+	Divider,
+	IconButton,
+	Paper,
+	Stack,
+	Typography,
+} from "@mui/material"
 import moment from "moment"
 import Head from "next/head"
 import { useRouter } from "next/router"
@@ -19,6 +28,20 @@ const likePost = async (id) => {
 	return data
 }
 
+const postReply = async (reply) => {
+	const response = await fetch("/api/post", {
+		method: "POST",
+		headers: {
+			Accepts: "application/json",
+			"Content-type": "application/json",
+		},
+		body: JSON.stringify(reply),
+	})
+	const data = await response.json()
+	if (data.error) return alert(data.error)
+	alert("Replied successfully")
+}
+
 export default function ForumQuestionPage() {
 	const router = useRouter()
 	const { id } = router.query
@@ -32,16 +55,39 @@ export default function ForumQuestionPage() {
 	return (
 		<>
 			<Head>
-				<title>{data ? data.title + "• HackSafe" : "Forum • HackSafe"}</title>
+				<title>
+					{data ? data.title + "• HackSafe" : "Forum • HackSafe"}
+				</title>
 			</Head>
-			<Stack sx={{ p: 2, gap: 2 }} width="100%" direction="column" alignItems="center">
-				<Paper sx={{ width: "100%", maxWidth: "1200px" }}>
+			<Stack
+				sx={{ p: 2, gap: 2 }}
+				width="100%"
+				direction="column"
+				alignItems="center"
+			>
+				<Paper sx={{ width: "100%", maxWidth: "1000px" }}>
 					{data && (
 						<>
-							<Stack pt={2} pb={1} px={2} direction="row" gap={1} alignItems="center" mb={1}>
-								<Avatar sx={{ width: 24, height: 24 }} alt={data.author.name} src={data.author.image} />
-								<Typography>{data.author.name}</Typography>
-								<Typography ml="auto" color="gray" fontSize={14}>
+							<Stack
+								pt={2}
+								pb={1}
+								px={2}
+								direction="row"
+								gap={1}
+								alignItems="center"
+								mb={1}
+							>
+								<Avatar
+									sx={{ width: 24, height: 24 }}
+									alt={data?.user?.name}
+									src={data?.user?.image}
+								/>
+								<Typography>{data?.user?.name}</Typography>
+								<Typography
+									ml="auto"
+									color="gray"
+									fontSize={14}
+								>
 									{moment(data.createdAt).fromNow()}
 								</Typography>
 							</Stack>
@@ -53,9 +99,22 @@ export default function ForumQuestionPage() {
 								<Typography>{data.body}</Typography>
 							</Stack>
 							<Divider />
-							<Stack direction="row" gap={1} alignItems="center" p={1} pr={2}>
-								<IconButton onClick={onLike} color={data.liked ? "primary" : "default"}>
-									{data.liked ? <ThumbUpAlt /> : <ThumbUpOffAlt />}
+							<Stack
+								direction="row"
+								gap={1}
+								alignItems="center"
+								p={1}
+								pr={2}
+							>
+								<IconButton
+									onClick={onLike}
+									color={data.liked ? "primary" : "default"}
+								>
+									{data.liked ? (
+										<ThumbUpAlt />
+									) : (
+										<ThumbUpOffAlt />
+									)}
 								</IconButton>{" "}
 								{data.likes} Likes
 								<IconButton>
@@ -66,11 +125,22 @@ export default function ForumQuestionPage() {
 						</>
 					)}
 				</Paper>
-				<Typography variant="h5" sx={{ width: "100%", maxWidth: "1200px", py: 1 }}>
+				<Typography
+					variant="h5"
+					sx={{ width: "100%", maxWidth: "1000px", py: 1 }}
+				>
 					Answers
 				</Typography>
 				<Stack gap={2} sx={{ width: "100%", maxWidth: "1000px" }}>
-					{data?.answers?.length > 0 ? data.answers.map((ans, index) => <PostAnswer indent={false} key={index} id={ans} />) : "No Answers"}
+					{data?.answers?.length > 0
+						? data.answers.map((ans, index) => (
+								<PostAnswer
+									indent={false}
+									key={index}
+									id={ans}
+								/>
+						  ))
+						: "No Answers"}
 				</Stack>
 			</Stack>
 		</>
@@ -78,11 +148,24 @@ export default function ForumQuestionPage() {
 }
 
 function SinglePost({ data, onLike }) {
+	const [replyDialogOpen, setReplyDialogOpen] = useState(false)
 	return (
 		<>
-			<Stack pt={2} pb={1} px={2} direction="row" gap={1} alignItems="center" mb={1}>
-				<Avatar sx={{ width: 24, height: 24 }} alt={data.author.name} src={data.author.image} />
-				<Typography>{data.author.name}</Typography>
+			<Stack
+				pt={2}
+				pb={1}
+				px={2}
+				direction="row"
+				gap={1}
+				alignItems="center"
+				mb={1}
+			>
+				<Avatar
+					sx={{ width: 24, height: 24 }}
+					alt={data?.user?.name}
+					src={data?.user?.image}
+				/>
+				<Typography>{data?.user?.name}</Typography>
 				<Typography ml="auto" color="gray" fontSize={14}>
 					{moment(data.createdAt).fromNow()}
 				</Typography>
@@ -94,15 +177,26 @@ function SinglePost({ data, onLike }) {
 			</Stack>
 			<Divider />
 			<Stack direction="row" gap={1} alignItems="center" p={1}>
-				<IconButton onClick={onLike} color={data.liked ? "primary" : "default"}>
+				<IconButton
+					onClick={onLike}
+					color={data.liked ? "primary" : "default"}
+				>
 					{data.liked ? <ThumbUpAlt /> : <ThumbUpOffAlt />}
 				</IconButton>{" "}
 				{data.likes} Likes
-				<IconButton>
+				<IconButton onClick={() => setReplyDialogOpen(true)}>
 					<Replay />
 				</IconButton>{" "}
 				{data.answers.length} Replies
 			</Stack>
+			<NewPostDialog
+				reference={data.id}
+				open={replyDialogOpen}
+				onClose={() => {
+					setReplyDialogOpen(false)
+				}}
+				onSubmit={(reply) => postReply(reply)}
+			/>
 		</>
 	)
 }
@@ -117,8 +211,19 @@ function PostAnswer({ id, indent }) {
 
 	return (
 		<>
-			<Paper sx={{ width: indent ? "95%" : "100%", maxWidth: "1000px", ml: "auto" }}>{data && <SinglePost onLike={onLike} data={data} />}</Paper>
-			{data?.answers && data.answers.map((ans, index) => <PostAnswer indent={true} key={index} id={ans} />)}
+			<Paper
+				sx={{
+					width: indent ? "95%" : "100%",
+					maxWidth: "1000px",
+					ml: "auto",
+				}}
+			>
+				{data && <SinglePost onLike={onLike} data={data} />}
+			</Paper>
+			{data?.answers &&
+				data.answers.map((ans, index) => (
+					<PostAnswer indent={true} key={index} id={ans} />
+				))}
 		</>
 	)
 }

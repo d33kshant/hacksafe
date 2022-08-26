@@ -7,6 +7,7 @@ import {
 } from "@mui/material"
 import moment from "moment"
 import { useEffect, useState } from "react"
+import VideoCard from "./VideoCard"
 
 export default function VideoCardHomePage() {
 	const [videos, setVideos] = useState([])
@@ -54,7 +55,7 @@ export default function VideoCardHomePage() {
 				</Typography>
 			</Stack>
 			<Divider />
-			<Stack direction="row" p={2} gap={2}>
+			<Stack sx={{ overflowX: "scroll" }} direction="row" p={2} gap={2}>
 				{loading ? (
 					<Stack alignItems="cente">
 						<CircularProgress />
@@ -72,7 +73,7 @@ export default function VideoCardHomePage() {
 	)
 }
 
-function VideoCard({ data: { id, title, thumbnail, views, updatedAt } }) {
+function VideoCard1({ data: { id, title, thumbnail, views, createdAt } }) {
 	return (
 		<Stack
 			width="250px"
@@ -92,7 +93,7 @@ function VideoCard({ data: { id, title, thumbnail, views, updatedAt } }) {
 			/>
 			<Typography variant="body1">{title}</Typography>
 			<Typography color="gray" variant="body2">
-				{views} Views • {moment(updatedAt).fromNow()}
+				{views} Views • {moment(createdAt).fromNow()}
 			</Typography>
 		</Stack>
 	)

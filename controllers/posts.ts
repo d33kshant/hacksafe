@@ -14,14 +14,18 @@ export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 	try {
 		if (id) {
 			const post = await prisma.post.findUnique({
-				where: { id }
+				where: { id },
+				include: {
+					User: {
+						select: {
+							id: true,
+							name: true,
+							image: true,
+						}
+					}
+				}
 			})
 			if (post) {
-				const author = await prisma.user.findUnique({
-					where: {
-						id: post.author
-					}
-				})
 				const answers = await prisma.post.findMany({
 					where: {
 						ref: post.id
@@ -30,10 +34,10 @@ export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 				})
 				return res.json({
 					...post,
-					author: {
-						id: author.id,
-						name: author.name,
-						image: author.image
+					user: {
+						id: post.User.id,
+						name: post.User.name,
+						image: post.User.image
 					},
 					answers: answers.map(ans => ans.id),
 					likes: post.likes.length,
@@ -52,6 +56,15 @@ export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 				},
 				skip: offset,
 				take: ITEMS_PER_PAGE,
+				include: {
+					User: {
+						select: {
+							id: true,
+							name: true,
+							image: true,
+						}
+					}
+				}
 			})
 
 			if (page <= Math.ceil(total / ITEMS_PER_PAGE)) {
@@ -62,7 +75,7 @@ export async function getPosts(req: NextApiRequest, res: NextApiResponse) {
 				const ans = await prisma.post.findMany({ where: { ref: post.id } })
 				answers.push(ans.length)
 			}
-			res.json(posts.map((post, index) => ({ ...post, likes: post.likes.length, answers: answers[index] })))
+			res.json(posts.map((post, index) => ({ ...post, likes: post.likes.length, user: post.User, answers: answers[index] })))
 		}
 	} catch (error) {
 		res.status(500).json({
@@ -76,9 +89,9 @@ export async function createPost(req: NextApiRequest, res: NextApiResponse) {
 	const user = await getUserFromSession(req, res)
 	if (!user) return res.status(400).json({ error: "Authentication required" })
 
-	const title: string = req.body.title
+	const title: string = req.body.title || ""
 	const body: string = req.body.body
-	const ref: string = req.body.ref
+	const ref: string = req.body.ref || ""
 
 	if (!title || !body) return res.json({ error: "Missing `title` and `body` field in request body." })
 

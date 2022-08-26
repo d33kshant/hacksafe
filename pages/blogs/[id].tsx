@@ -2,6 +2,7 @@ import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import {
 	CircularProgress,
 	Divider,
+	IconButton,
 	Paper,
 	Stack,
 	Typography,
@@ -10,6 +11,8 @@ import { marked } from "marked"
 import DOMPurify from "isomorphic-dompurify"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
+import ReportDialog from "@/components/ReportDialog"
+import { FlagCircle } from "@mui/icons-material"
 
 export default function BlogPage() {
 	const router = useRouter()
@@ -18,6 +21,8 @@ export default function BlogPage() {
 	const [timeout, _setTimeout] = useState(null)
 	const [blog, setBlog] = useState(null)
 	const [loading, setLoading] = useState(true)
+
+	const [reportDialogOpen, setReportDialogOpen] = useState(false)
 
 	useEffect(() => {
 		const fetchBlog = async () => {
@@ -82,9 +87,26 @@ export default function BlogPage() {
 									}}
 									src={blog.banner}
 								/>
-								<Typography mt={2} variant="h4">
-									{blog.title}
-								</Typography>
+								<Stack>
+									<Stack
+										mt={2}
+										alignItems="center"
+										direction="row"
+									>
+										<Typography flex={1} variant="h4">
+											{blog.title}
+										</Typography>
+										<IconButton
+											size="large"
+											title="Report this blog"
+											onClick={() =>
+												setReportDialogOpen(true)
+											}
+										>
+											<FlagCircle fontSize="inherit" />
+										</IconButton>
+									</Stack>
+								</Stack>
 							</Stack>
 							<Divider />
 							<Stack p={2}>
@@ -102,6 +124,12 @@ export default function BlogPage() {
 						</>
 					)}
 				</Paper>
+				<ReportDialog
+					contentId={id}
+					contentType="blogs"
+					open={reportDialogOpen}
+					onClose={() => setReportDialogOpen(false)}
+				/>
 			</Stack>
 		</>
 	)

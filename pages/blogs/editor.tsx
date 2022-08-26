@@ -1,6 +1,10 @@
 import withAppBarAndDrwaer from "@/components/withAppBarAndDrwaer"
 import {
 	Button,
+	CircularProgress,
+	Dialog,
+	DialogContent,
+	DialogTitle,
 	Divider,
 	Paper,
 	Stack,
@@ -13,6 +17,7 @@ import { useEffect, useState } from "react"
 import { marked } from "marked"
 import { useRouter } from "next/router"
 import DOMPurify from "isomorphic-dompurify"
+import { CheckCircle, Error, Warning } from "@mui/icons-material"
 
 const INITIAL_STATE = {
 	title: "",
@@ -32,6 +37,9 @@ export default function BlogEditor() {
 	const [isFetching, setIsFetching] = useState(false)
 	const [currentTab, setCurrentTab] = useState(0)
 	const [formState, setFormState] = useState(INITIAL_STATE)
+	const [plagiarismModelOpen, setPlagiarismModelOpen] = useState(false)
+	const [loadingPlagiarism, setLoadingPlagiarism] = useState(false)
+	const [plagiarism, setPlagiarism] = useState(-1)
 
 	const changeTab = (_: unknown, tabIndex: number) => setCurrentTab(tabIndex)
 
@@ -81,6 +89,30 @@ export default function BlogEditor() {
 		return form.title && form.body
 	}
 
+	const checkPlagiarism = async () => {
+		setPlagiarismModelOpen(true)
+		setLoadingPlagiarism(true)
+		const response = await fetch("http://localhost:9000/", {
+			method: "POST",
+			headers: {
+				Accepts: "application/json",
+				"Content-type": "application/json",
+			},
+			body: JSON.stringify({
+				query: formState.body,
+			}),
+		})
+		const json = await response.json()
+		console.log(json)
+		if (json.plagiarism !== null) {
+			setLoadingPlagiarism(false)
+			setPlagiarism(json.plagiarism)
+		} else {
+			setLoadingPlagiarism(false)
+			setPlagiarism(-1)
+		}
+	}
+
 	const postTheBlog = async () => {
 		if (!isValidForm(formState)) {
 			return alert("Blog must contain a title and some content")
@@ -97,6 +129,8 @@ export default function BlogEditor() {
 			const data = await response.json()
 			if (data.error) return alert(data.error)
 			alert("Blog posted successfully.")
+			setPlagiarismModelOpen(false)
+			window.location.href = "/blogs/" + data.id
 		} else {
 			const response = await fetch("/api/blogs", {
 				method: "POST",
@@ -181,7 +215,7 @@ export default function BlogEditor() {
 					<Divider />
 					<Stack p={2} justifyContent="end">
 						<Button
-							onClick={postTheBlog}
+							onClick={checkPlagiarism}
 							sx={{ boxShadow: 0 }}
 							variant="contained"
 							color="success"
@@ -192,6 +226,25 @@ export default function BlogEditor() {
 					</Stack>
 				</Paper>
 				<Divider />
+				<Dialog
+					onClose={() => {
+						if (!loadingPlagiarism) setPlagiarismModelOpen(false)
+					}}
+					open={plagiarismModelOpen}
+				>
+					<DialogTitle>Please wait, Checking plagiarism</DialogTitle>
+					<DialogContent>
+						<Stack direction="row" alignItems="center" gap={1}>
+							{getPlagiarismDialogContent(
+								loadingPlagiarism,
+								plagiarism,
+								() => {
+									postTheBlog()
+								},
+							)}
+						</Stack>
+					</DialogContent>
+				</Dialog>
 			</Stack>
 		</>
 	)
@@ -202,6 +255,57 @@ function TabPanel({ currentTab, index, children }) {
 		<div role="tabpanel" hidden={currentTab !== index}>
 			{currentTab === index && <Stack sx={{ p: 3 }}>{children}</Stack>}
 		</div>
+	)
+}
+
+const getPlagiarismDialogContent = (
+	loading: boolean,
+	value: number,
+	onSubmit,
+) => {
+	if (loading) {
+		return (
+			<>
+				<CircularProgress />
+				<Typography>Checking Plagiarism</Typography>
+			</>
+		)
+	}
+	if (value < 0) {
+		return (
+			<>
+				<Error color="error" />
+				<Typography>Failed to check plagiarism</Typography>
+			</>
+		)
+	}
+	if (value > 0.5) {
+		return (
+			<>
+				<Warning color="warning" />
+				<Typography>
+					Found {(value * 100).toFixed(2)}% plagiarism
+				</Typography>
+			</>
+		)
+	}
+	return (
+		<Stack width="100%" alignItems="center">
+			<Stack alignItems="center" direction="row" gap={1}>
+				<CheckCircle color="success" />
+				<Typography>
+					Found {(value * 100).toFixed(2)}% plagiarism
+				</Typography>
+			</Stack>
+			<Button
+				onClick={onSubmit}
+				sx={{ mt: 2 }}
+				variant="contained"
+				color="success"
+			>
+				Continue
+			</Button>
+		</Stack>
 	)
 }
 

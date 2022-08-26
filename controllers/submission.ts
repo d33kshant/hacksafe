@@ -36,9 +36,7 @@ export async function createdSubmission(req: NextApiRequest, res: NextApiRespons
 	// Validate submission format - Mapping<QuestionId, SelectedAnswersIndex>
 	for (const question of Object.keys(_submission)) {
 		const answers = _submission[question]
-		if (typeof question !== 'string' || Array.isArray(answers)) {
-			return res.status(400).json({ error: "Invalid submission format." })
-		}
+		_submission[question] = new String(answers)
 	}
 
 	try {
