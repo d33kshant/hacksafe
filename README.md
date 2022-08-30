@@ -18,7 +18,7 @@ points which can be used to get digital goods like vouchers, coupons and certifi
 ### Architecture
 Our Architecture is designed to be very simple yet very scalable with minimum complexity possible. It only involves component that are required for the solution to work.
 <p align="center">
-  <img src="./assets/architecture.svg"/>
+  <img src="architecture.svg"/>
 </p>
 
 The recommendation system is not planned and it's implementation work is decided to be done in the future.
